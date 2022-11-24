@@ -1,0 +1,139 @@
+<html> <head> <title>Upload picture</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/polyfills.umd.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+
+
+<link rel='stylesheet' type='text/css' href='style.css'/>
+<meta name='viewport' content='user-scalable=no,initial-scale=1,maximum-scale=1'/>
+<style>
+.send{padding:7px 15px;margin:0px;background-color:#0080ff;color:#fff;border-style:solid;border-width:0px}
+*{font-family: Arial, Helvetica, sans-serif;}
+#userfile{margin:10px;border:1px solid #ccc;}
+a{text-decoration:none}
+.error{color:#f00}
+
+input[type="file"]{width:90%;}
+#updiv{margin:5px 2px}
+#updiv p{font-weight:bold;margin:0px 5px}
+#preimg{max-width:300px}
+[target="_blank"]{display:none}
+</style></head><body>
+
+
+
+<div id="updiv">
+
+<div id="fsize"></div>
+
+<form enctype="multipart/form-data"action=""method="post">
+<img id="preimg">
+
+
+<p>choose image height</p>
+
+<input name="imgsize"type="text">
+
+<p>select a file to upload</p>
+<center><input type="file"name="userfile[]"size="30"id="userfile"accept="image/*"id="userfile" multiple />
+
+
+
+
+<br><input type="submit"value="Upload"name="Send"id="Send"class="send"></center>
+</form>
+
+<canvas id="canvas" width=300></canvas>
+<img id="midimg"src="camera.jpg">
+</div>
+
+
+<script>
+
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+
+
+
+
+$('#userfile').change(function (e) {
+
+var file = e.target.files[0];
+
+    var reader = new FileReader();
+    reader.onload = function(evt){
+        var img = new Image();
+        img.src =evt.target.result;;
+        img.onload = function(){
+            
+$('#fsize').text("width:"+this.width +"height:" + this.height);
+
+var ratio=img.height/img.width;
+
+ratio=ratio>1?ratio:1/ratio;
+alert(ratio);
+
+var fv=1000;
+var pdfv=250;
+
+if(img.height>img.width){
+canvas.height=fv;
+canvas.width=fv/ratio;
+var fh=fv;
+var fw=fv/ratio;
+var pdfh=pdfv;
+var pdfw=pdfv/ratio;
+}else{
+canvas.height=fv/ratio;
+canvas.width=fv;
+var fh=fv/ratio;
+var fw=fv;
+var pdfw=pdfv*ratio;
+var pdfh=pdfv;
+}
+
+
+    // step 1 - resize to 50%
+    var oc = document.createElement('canvas'),
+        octx = oc.getContext('2d');
+
+
+    oc.width = fw;
+    oc.height = fh;
+    octx.drawImage(img, 0, 0, oc.width, oc.height);
+
+
+    // step 2
+    octx.drawImage(oc, 0, 0,fw,fh);
+
+    // step 3, resize to final size
+    ctx.drawImage(oc, 0, 0,fw,fh,
+    0, 0, canvas.width, canvas.height);
+
+var dataurl=canvas.toDataURL("image/jpeg");
+
+$("#midimg").attr("src",dataurl);
+
+const doc = new jsPDF();
+
+doc.addImage(dataurl,"JPEG",12,3,pdfw,pdfh);
+doc.save("rghsfile.pdf");
+
+        }
+                $("#preimg").attr("src",evt.target.result);
+    }
+            
+    reader.readAsDataURL(this.files[0]);
+
+
+});
+
+</script>
+
+
+
